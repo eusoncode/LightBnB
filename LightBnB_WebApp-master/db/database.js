@@ -1,17 +1,17 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+//Credentials to log on to the Database
 const dbCredentials = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
   database: process.env.DATABASE,
   port: process.env.DB_PORT
-}
+};
 
+// Establish a connection to the Database
 const pool = new Pool(dbCredentials);
-
-const users = require("./json/users.json");
 
 /// Users
 
@@ -20,15 +20,21 @@ const users = require("./json/users.json");
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithEmail = function (email) {
-  let resolvedUser = null;
-  for (const userId in users) {
-    const user = users[userId];
-    if (user && user.email.toLowerCase() === email.toLowerCase()) {
-      resolvedUser = user;
-    }
-  }
-  return Promise.resolve(resolvedUser);
+const getUserWithEmail = function(email) {
+  return pool
+    .query(`SELECT * FROM users WHERE email like $1`, [email])
+    .then((result) => {
+      let resolvedUser = null;
+      const user = result.rows[0];
+      if (user && user.email.toLowerCase() === email.toLowerCase()) {
+        resolvedUser = user;
+      }
+      return Promise.resolve(resolvedUser);
+    })
+    .catch((err) => {
+      console.error('Error querying database:', err.message);
+      throw err; // Rethrow the error to be handled elsewhere
+    });
 };
 
 /**
@@ -36,8 +42,21 @@ const getUserWithEmail = function (email) {
  * @param {string} id The id of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithId = function (id) {
-  return Promise.resolve(users[id]);
+const getUserWithId = function(id) {
+  return pool
+    .query(`SELECT * FROM users WHERE id = $1`, [id])
+    .then((result) => {
+      let resolvedUser = null;
+      const user = result.rows[0];
+      if (user && user.id === id) {
+        resolvedUser = user;
+      }
+      return Promise.resolve(resolvedUser);
+    })
+    .catch((err) => {
+      console.error('Error querying database:', err.message);
+      throw err; // Rethrow the error to be handled elsewhere
+    });
 };
 
 /**
@@ -45,11 +64,18 @@ const getUserWithId = function (id) {
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
-const addUser = function (user) {
-  const userId = Object.keys(users).length + 1;
-  user.id = userId;
-  users[userId] = user;
-  return Promise.resolve(user);
+const addUser = function(user) {
+  return pool
+    .query(`INSERT INTO users (name, email, password) 
+    VALUES ($1, $2, $3) RETURNING *`, [user.name, user.email, user.password])
+    .then((result) => {
+      const newUserAdded = result.rows[0];
+      return Promise.resolve(newUserAdded);
+    })
+    .catch((err) => {
+      console.error('Error adding user:', err.message);
+      throw err; // Rethrow the error to be handled elsewhere
+    });
 };
 
 /// Reservations
@@ -59,8 +85,8 @@ const addUser = function (user) {
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservations = function (guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+const getAllReservations = function(guest_id, limit = 10) {
+  return getAllProperties(null, limit);
 };
 
 /// Properties
@@ -75,11 +101,11 @@ const getAllProperties = (options, limit = 10) => {
   return pool
     .query(`SELECT * FROM properties LIMIT $1`, [limit])
     .then((result) => {
-      console.log(result.rows);
       return result.rows;
     })
     .catch((err) => {
-      console.log(err.message);
+      console.error('Error querying database:', err.message);
+      throw err; // Rethrow the error to be handled elsewhere
     });
 };
 
@@ -88,7 +114,7 @@ const getAllProperties = (options, limit = 10) => {
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
-const addProperty = function (property) {
+const addProperty = function(property) {
   const propertyId = Object.keys(properties).length + 1;
   property.id = propertyId;
   properties[propertyId] = property;
