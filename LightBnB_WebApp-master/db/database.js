@@ -8,7 +8,7 @@ const pool = new Pool({
 });
 
 
-const properties = pool.query(`SELECT title FROM properties LIMIT 2;`);
+const properties = require("./json/properties.json");
 const users = require("./json/users.json");
 
 /// Users
@@ -57,7 +57,7 @@ const addUser = function (user) {
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservations = function (guest_id, limit = 2) {
+const getAllReservations = function (guest_id, limit = 10) {
   return getAllProperties(null, 2);
 };
 
@@ -69,7 +69,7 @@ const getAllReservations = function (guest_id, limit = 2) {
  * @param {*} limit The number of results to return.
  * @return {Promise<[{}]>}  A promise to the properties.
  */
-const getAllProperties = (options, limit = 2) => {
+const getAllProperties = (options, limit = 10) => {
   return pool
     .query(`SELECT * FROM properties LIMIT $1`, [limit])
     .then((result) => {
