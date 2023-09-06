@@ -85,8 +85,27 @@ const addUser = function(user) {
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservations = function(guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+const getAllReservations = function (guest_id, limit = 2) {
+  // Define all reservations made my guest
+  const guestsReservations = `
+  SELECT reservations.id, properties.title, properties.cost_per_night, reservations.start_date, AVG(property_reviews.rating) AS average_rating
+  FROM reservations
+  JOIN properties ON properties.id = reservations.property_id
+  JOIN property_reviews ON property_reviews.property_id = properties.id
+  WHERE reservations.guest_id = $1
+  GROUP BY reservations.id, properties.title, reservations.start_date, properties.cost_per_night
+  ORDER BY start_date ASC
+  LIMIT $2;
+  `;
+  return pool
+    .query(guestsReservations, [guest_id, limit])
+    .then((result) => {
+      return Promise.resolve(result.rows);
+    })
+    .catch((err) => {
+      console.error('Error querying database:', err.message);
+      throw err; // Rethrow the error to be handled elsewhere
+    });
 };
 
 /// Properties
@@ -101,7 +120,7 @@ const getAllProperties = (options, limit = 10) => {
   return pool
     .query(`SELECT * FROM properties LIMIT $1`, [limit])
     .then((result) => {
-      return result.rows;
+      return Promise.resolve(result.rows);
     })
     .catch((err) => {
       console.error('Error querying database:', err.message);
