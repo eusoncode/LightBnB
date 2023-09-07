@@ -67,7 +67,7 @@ const getUserWithId = function(id) {
 const addUser = function(user) {
   return pool
     .query(`INSERT INTO users (name, email, password) 
-    VALUES ($1, $2, $3) RETURNING *`, [user.name, user.email, user.password])
+    VALUES ($1, $2, $3) RETURNING *;`, [user.name, user.email, user.password])
     .then((result) => {
       const newUserAdded = result.rows[0];
       return Promise.resolve(newUserAdded);
@@ -194,15 +194,76 @@ const getAllProperties = (options, limit = 10) => {
 
 
 /**
- * Add a property to the database
- * @param {{}} property An object containing all of the property details.
- * @return {Promise<{}>} A promise to the property.
+ * Add a new property to the properties table.
+ * @param {Object} property The property object to be added.
+ * @return {Promise<[{}]>} A promise to the saved version of the property.
  */
-const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+const addProperty = (property) => {
+  // Define the query parameters and query values
+  const queryParams = [];
+  const queryValues = [];
+
+  // Convert string values to integers where needed
+  property.number_of_bedrooms = parseInt(property.number_of_bedrooms, 10);
+  property.number_of_bathrooms = parseInt(property.number_of_bathrooms, 10);
+  property.parking_spaces = parseInt(property.parking_spaces, 10);
+  property.cost_per_night = parseInt(property.cost_per_night, 10);
+
+  // Construct the query string dynamically based on the provided property object
+  let queryString = `
+    INSERT INTO properties (
+      owner_id,
+      title,
+      description,
+      thumbnail_photo_url,
+      cover_photo_url,
+      cost_per_night,
+      street,
+      city,
+      province,
+      post_code,
+      country,
+      parking_spaces,
+      number_of_bathrooms,
+      number_of_bedrooms
+    ) VALUES (
+  `;
+
+  // Define an array of column names that correspond to the properties in the object
+  const columnNames = [
+    'owner_id',
+    'title',
+    'description',
+    'thumbnail_photo_url',
+    'cover_photo_url',
+    'cost_per_night',
+    'street',
+    'city',
+    'province',
+    'post_code',
+    'country',
+    'parking_spaces',
+    'number_of_bathrooms',
+    'number_of_bedrooms',
+  ];
+
+  // Loop through the column names and add the corresponding values to queryParams
+  for (const columnName of columnNames) {
+    queryParams.push(property[columnName]);
+    queryValues.push(`$${queryParams.length}`);
+  }
+
+  queryString += queryValues.join(', '); // Join the values with commas
+  queryString += `) RETURNING *;`; // Add RETURNING * to return the saved property
+
+  // Execute the query and return the saved property
+  return pool
+    .query(queryString, queryParams)
+    .then((result) => console.log(result.rows[0])) // Return the first row (saved property)
+    .catch((err) => {
+      console.error('Error inserting property:', err.message);
+      throw err; // Rethrow the error to be handled elsewhere
+    });
 };
 
 module.exports = {
