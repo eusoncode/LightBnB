@@ -63,7 +63,7 @@ LightBnB is a light version of Airbnb. It allows homeowners to rent out all or a
 !["Screenshot of the LightBnB Homepage"]()
 !["Screenshot of the LightBnB Create_Listing page"]()
 !["Screenshot of the LightBnB My_Listing page"]()
-!["Screenshot of the LightBnB Search_Listing page"]()
+!["Screenshot of the LightBnB Search_Listing page"](https://github.com/eusoncode/LightBnB/blob/main/LightBnB_WebApp-master/public/screenshots/LightBnB_Search_Listing.png)
 
 ## Getting Started
 - Clone your repository onto your local device.
