@@ -57,20 +57,20 @@ LightBnB is a light version of Airbnb. It allows homeowners to rent out all or a
 * `server.js` is the entry point to the application. This connects the routes to the database.
 
 ## LightBnB ERD
-!["Screenshot of the LightBnB ERD"]()
+!["Screenshot of the LightBnB ERD"](https://github.com/eusoncode/LightBnB/blob/main/LightBnB_WebApp-master/public/screenshots/LightBnB_ERD.png)
 
 ## LightBnB Screenshots
 !["Screenshot of the LightBnB Create_Listing page"](https://github.com/eusoncode/LightBnB/blob/main/LightBnB_WebApp-master/public/screenshots/LightBnB_Create_Listing.png)
 !["Screenshot of the LightBnB My_Reservations page"](https://github.com/eusoncode/LightBnB/blob/main/LightBnB_WebApp-master/public/screenshots/LightBnB_My_Reservations.png)
 !["Screenshot of the LightBnB Search_Listing page"](https://github.com/eusoncode/LightBnB/blob/main/LightBnB_WebApp-master/public/screenshots/LightBnB_Search_Listing.png)
 
-## Getting Started
-- Clone your repository onto your local device.
-- Install dependencies below using the npm install command.
-- Start and connect to the postgres database
-- Start the web server using the npm start command. The app will be served at http://localhost:8080/.
-- Go to http://localhost:8080/ in your browser to view the property listing in LightBnB.
-
 ## Dependencies
 - pg
 - dotenv
+
+## Getting Started
+- Clone your repository onto your local device.
+- Install dependencies above using the npm install command.
+- Start and connect to the postgres database
+- Start the web server using the npm run local command to run the node nodemon. The app will be served at http://localhost:8080/.
+- Go to http://localhost:8080/ in your browser to view the property listing in LightBnB.
